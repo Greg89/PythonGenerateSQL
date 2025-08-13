@@ -1,0 +1,6 @@
+# CSV to SQL Converter Dependencies
+# This program uses only Python standard library modules
+# No external packages are required
+
+# Python version requirement
+# This program works with Python 3.6+
