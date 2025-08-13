@@ -1,0 +1,23 @@
+{
+  "input_directory": "csv_input",
+  "output_directory": "sql_output",
+  "default_table_name": "table_name",
+  "auto_detect_encoding": true,
+  "batch_size": 100,
+  "include_create_table": true,
+  "sql_dialect": "sqlserver",
+  "date_format": "YYYY-MM-DD",
+  "null_values": [
+    "",
+    "NULL",
+    "null",
+    "None",
+    "none"
+  ],
+  "max_rows_per_file": 10000,
+  "verbose": true,
+  "custom_settings": {
+    "example_feature": "value",
+    "another_option": true
+  }
+}

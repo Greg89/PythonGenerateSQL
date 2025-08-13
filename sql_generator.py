@@ -8,7 +8,180 @@ import csv
 import argparse
 import os
 import sys
+import json
 from typing import List, Dict, Any
+from pathlib import Path
+
+# Default configuration
+DEFAULT_CONFIG = {
+    "input_directory": "csv_input",
+    "output_directory": "sql_output",
+    "default_table_name": "table_name",
+    "auto_detect_encoding": True,
+    "batch_size": 100,
+    "include_create_table": True,
+    "sql_dialect": "sqlserver",  # sqlserver, mysql, postgresql
+    "date_format": "YYYY-MM-DD",
+    "null_values": ["", "NULL", "null", "None", "none"],
+    "max_rows_per_file": 10000,
+    "verbose": True
+}
+
+def load_config(config_file: str = None) -> Dict[str, Any]:
+    """
+    Load configuration from file or create default.
+
+    Args:
+        config_file (str): Path to configuration file
+
+    Returns:
+        Dict[str, Any]: Configuration dictionary
+    """
+    config = DEFAULT_CONFIG.copy()
+
+    # Try to load from specified config file
+    if config_file and os.path.exists(config_file):
+        try:
+            with open(config_file, 'r', encoding='utf-8') as f:
+                user_config = json.load(f)
+                config.update(user_config)
+                print(f"📋 Loaded configuration from: {config_file}")
+        except Exception as e:
+            print(f"⚠️  Warning: Could not load config file {config_file}: {e}")
+            print("   Using default configuration")
+
+    # Try to load from default config location
+    elif os.path.exists("config.json"):
+        try:
+            with open("config.json", 'r', encoding='utf-8') as f:
+                user_config = json.load(f)
+                config.update(user_config)
+                print(f"📋 Loaded configuration from: config.json")
+        except Exception as e:
+            print(f"⚠️  Warning: Could not load default config.json: {e}")
+
+    return config
+
+def save_config(config: Dict[str, Any], config_file: str = "config.json") -> None:
+    """
+    Save configuration to file.
+
+    Args:
+        config (Dict[str, Any]): Configuration to save
+        config_file (str): Path to save configuration
+    """
+    try:
+        with open(config_file, 'w', encoding='utf-8') as f:
+            json.dump(config, f, indent=2, ensure_ascii=False)
+        print(f"💾 Configuration saved to: {config_file}")
+    except Exception as e:
+        print(f"❌ Error saving configuration: {e}")
+
+def create_sample_config() -> None:
+    """Create a sample configuration file."""
+    sample_config = {
+        "input_directory": "csv_input",
+        "output_directory": "sql_output",
+        "default_table_name": "table_name",
+        "auto_detect_encoding": True,
+        "batch_size": 100,
+        "include_create_table": True,
+        "sql_dialect": "sqlserver",
+        "date_format": "YYYY-MM-DD",
+        "null_values": ["", "NULL", "null", "None", "none"],
+        "null_values": ["", "NULL", "null", "None", "none"],
+        "max_rows_per_file": 10000,
+        "verbose": True,
+        "custom_settings": {
+            "example_feature": "value",
+            "another_option": True
+        }
+    }
+
+    save_config(sample_config, "config_sample.json")
+    print("📝 Sample configuration file created: config_sample.json")
+    print("   Copy this to config.json and modify as needed")
+
+def apply_preset(config: Dict[str, Any], preset_name: str) -> Dict[str, Any]:
+    """
+    Apply a named preset configuration.
+
+    Args:
+        config (Dict[str, Any]): Base configuration
+        preset_name (str): Name of preset to apply
+
+    Returns:
+        Dict[str, Any]: Modified configuration
+    """
+    presets = {
+        "quick": {
+            "verbose": False,
+            "batch_size": 1000,
+            "include_create_table": False,
+            "max_rows_per_file": 5000
+        },
+        "detailed": {
+            "verbose": True,
+            "batch_size": 50,
+            "include_create_table": True,
+            "max_rows_per_file": 1000
+        },
+        "minimal": {
+            "verbose": False,
+            "batch_size": 5000,
+            "include_create_table": False,
+            "max_rows_per_file": 50000
+        }
+    }
+
+    if preset_name in presets:
+        config.update(presets[preset_name])
+        print(f"🎯 Applied '{preset_name}' preset")
+    else:
+        print(f"⚠️  Unknown preset '{preset_name}'. Available: {', '.join(presets.keys())}")
+
+    return config
+
+def interactive_config(config: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Interactive configuration mode.
+
+    Args:
+        config (Dict[str, Any]): Base configuration
+
+    Returns:
+        Dict[str, Any]: Modified configuration
+    """
+    print("🔧 Interactive Configuration Mode")
+    print("Press Enter to keep current values, or type new values:")
+
+    try:
+        # Table name
+        new_table = input(f"Table name [{config['default_table_name']}]: ").strip()
+        if new_table:
+            config['default_table_name'] = new_table
+
+        # SQL dialect
+        new_dialect = input(f"SQL dialect [{config['sql_dialect']}]: ").strip()
+        if new_dialect in ['sqlserver', 'mysql', 'postgresql']:
+            config['sql_dialect'] = new_dialect
+
+        # Batch size
+        new_batch = input(f"Batch size [{config['batch_size']}]: ").strip()
+        if new_batch.isdigit():
+            config['batch_size'] = int(new_batch)
+
+        # Verbose mode
+        verbose_input = input(f"Verbose mode [{config['verbose']}]: ").strip().lower()
+        if verbose_input in ['true', 'false', 'yes', 'no']:
+            config['verbose'] = verbose_input in ['true', 'yes']
+
+        print("✅ Configuration updated!")
+
+    except KeyboardInterrupt:
+        print("\n⚠️  Configuration cancelled, using defaults")
+
+    return config
 
 
 def read_csv(file_path: str) -> List[Dict[str, Any]]:
@@ -171,12 +344,16 @@ Examples:
   python sql_generator.py -t users data.csv       # Specify table name
   python sql_generator.py -t #temp_users data.csv # Use temporary table
   python sql_generator.py -o output.sql data.csv  # Specify output file
+  python sql_generator.py --create-config         # Create sample config file
+  python sql_generator.py --interactive           # Run in interactive mode
+  python sql_generator.py --preset quick          # Use quick preset
 
 Notes:
-  - CSV files are automatically looked for in csv_input/ folder
+  - CSV files are automatically looked for in csv_input/ folder (JSON files are excluded)
   - SQL files are automatically saved to sql_output/ folder
   - Temporary tables (#) automatically generate CREATE TABLE statements
   - Global temporary tables (##) are not supported
+  - Configuration file (config.json) can be used for persistent settings
   - Run without arguments to see available CSV files
         """
     )
@@ -185,15 +362,42 @@ Notes:
     parser.add_argument('-o', '--output', help='Output SQL file path (default: sql_output/input_name.sql)')
     parser.add_argument('-t', '--table', default='table_name',
                        help='Target table name (default: table_name). Use #temp_name for temporary tables.')
+    parser.add_argument('-c', '--config', help='Configuration file path (default: config.json)')
+    parser.add_argument('--create-config', action='store_true', help='Create sample configuration file')
+    parser.add_argument('--interactive', action='store_true', help='Run in interactive mode')
+    parser.add_argument('--preset', help='Use named preset (quick, detailed, minimal)')
 
     args = parser.parse_args()
+
+    # Handle configuration file creation
+    if args.create_config:
+        create_sample_config()
+        sys.exit(0)
+
+    # Load configuration
+    config = load_config(args.config)
+
+    # Handle presets
+    if args.preset:
+        config = apply_preset(config, args.preset)
+
+    # Handle interactive mode
+    if args.interactive:
+        config = interactive_config(config)
+
+    # Override config with command line arguments
+    if args.table != 'table_name':
+        config['default_table_name'] = args.table
+    if args.output:
+        config['output_directory'] = os.path.dirname(args.output) if os.path.dirname(args.output) else config['output_directory']
 
     # Handle default CSV file path
     if not args.csv_file:
         # Look for CSV files in csv_input folder
-        csv_input_dir = "csv_input"
+        csv_input_dir = config['input_directory']
         if os.path.exists(csv_input_dir):
-            csv_files = [f for f in os.listdir(csv_input_dir) if f.endswith('.csv')]
+            # Filter out JSON files and only show CSV files
+            csv_files = [f for f in os.listdir(csv_input_dir) if f.endswith('.csv') and not f.endswith('.json')]
             if csv_files:
                 print("📁 Available CSV files in csv_input/ folder:")
                 for i, file in enumerate(csv_files, 1):
@@ -203,25 +407,34 @@ Notes:
                 print(f"   python sql_generator.py csv_input/{csv_files[0]}")
                 print(f"   python sql_generator.py csv_input/your_file.csv")
                 print()
+                print("💡 Tip: Use 'python sql_generator.py --create-config' to generate configuration files")
                 sys.exit(0)
             else:
                 print("No CSV files found in csv_input/ folder.")
                 print("Please place CSV files in the csv_input/ folder or specify a file path.")
+                print()
+                print("💡 Getting started:")
+                print("   1. python sql_generator.py --create-config")
+                print("   2. Copy config_sample.json to config.json and edit as needed")
+                print("   3. Place your CSV files in csv_input/ folder")
+                print("   4. Run: python sql_generator.py your_file.csv")
                 sys.exit(1)
         else:
             print("csv_input/ folder not found.")
             print("Please create the folder or specify a CSV file path.")
             sys.exit(1)
 
-    # Auto-prepend csv_input/ if path doesn't exist and doesn't already have csv_input/
-    if not os.path.exists(args.csv_file) and not args.csv_file.startswith('csv_input/') and not args.csv_file.startswith('./'):
-        csv_input_path = f"csv_input/{args.csv_file}"
+    # Auto-prepend input directory if path doesn't exist and doesn't already have input dir prefix
+    input_dir = config['input_directory']
+    if not os.path.exists(args.csv_file) and not args.csv_file.startswith(f"{input_dir}/") and not args.csv_file.startswith('./'):
+        csv_input_path = f"{input_dir}/{args.csv_file}"
         if os.path.exists(csv_input_path):
             args.csv_file = csv_input_path
             print(f"📁 Auto-detected CSV file: {args.csv_file}")
 
     # Validate table name
-    if args.table.startswith('##'):
+    table_name = config['default_table_name']
+    if table_name.startswith('##'):
         print("❌ Error: Global temporary tables (##) are not supported.")
         print("   Use local temporary tables (#) instead.")
         print("   Example: #temp_users (not ##global_temp_users)")
@@ -238,7 +451,7 @@ Notes:
     # Generate output filename if not specified
     if not args.output:
         base_name = os.path.splitext(os.path.basename(args.csv_file))[0]
-        args.output = f"sql_output/{base_name}.sql"
+        args.output = f"{config['output_directory']}/{base_name}.sql"
 
     # Ensure output directory exists
     output_dir = os.path.dirname(args.output)
@@ -246,14 +459,14 @@ Notes:
         os.makedirs(output_dir)
 
     print(f"Converting CSV file: {args.csv_file}")
-    print(f"Target table: {args.table}")
+    print(f"Target table: {table_name}")
     print(f"Output file: {args.output}")
     print("-" * 50)
 
     # Show folder structure info
     print("📁 Folder Structure:")
-    print("   csv_input/     - Place your CSV files here")
-    print("   sql_output/    - Generated SQL files go here")
+    print(f"   {config['input_directory']}/     - Place your CSV files here (JSON files excluded)")
+    print(f"   {config['output_directory']}/    - Generated SQL files go here")
     print("-" * 50)
 
     # Read CSV data
@@ -270,7 +483,7 @@ Notes:
 
     # Generate SQL
     print("Generating SQL INSERT statements...")
-    sql_content = generate_sql_inserts(data, args.table)
+    sql_content = generate_sql_inserts(data, table_name)
 
     # Write output file
     print("Writing SQL file...")

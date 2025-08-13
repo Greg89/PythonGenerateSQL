@@ -44,6 +44,11 @@ desktop.ini
 *.csv
 *.sql
 
+# Configuration files - exclude from version control (users generate their own)
+config.json
+*.config.json
+!config_sample.json
+
 # Keep README files in subfolders
 !csv_input/README.md
 !sql_output/README.md
