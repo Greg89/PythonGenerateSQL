@@ -7,6 +7,7 @@ A Python program that converts CSV files to SQL INSERT statements for easy datab
 - Converts CSV files to SQL INSERT statements
 - **Smart folder detection** - automatically finds CSV files in `csv_input/` folder
 - **Organized output** - saves SQL files to `sql_output/` folder by default
+- **Flexible table naming** - supports regular tables and temporary tables (with `#`)
 - Handles data type conversion and escaping
 - Supports custom table names
 - Generates clean, readable SQL output
@@ -45,11 +46,14 @@ python sql_generator.py input.csv
 # Specify custom table name
 python sql_generator.py input.csv -t users
 
+# Use temporary table (SQL Server) - automatically generates CREATE TABLE
+python sql_generator.py input.csv -t #temp_users
+
 # Specify custom output file
 python sql_generator.py input.csv -o sql_output/users_insert.sql
 
 # Specify both table name and output file
-python sql_generator.py input.csv -t users -o sql_output/users_insert.sql
+python sql_generator.py input.csv -t #temp_users -o sql_output/temp_users.sql
 
 # Use explicit paths
 python sql_generator.py csv_input/input.csv -o sql_output/output.sql
@@ -60,6 +64,9 @@ python sql_generator.py csv_input/input.csv -o sql_output/output.sql
 - `csv_file`: Input CSV file path (required)
 - `-o, --output`: Output SQL file path (optional, defaults to input_name.sql)
 - `-t, --table`: Target table name (optional, defaults to 'table_name')
+  - Supports temporary table names with `#` (e.g., `#temp_table`)
+  - Supports regular table names (e.g., `users`, `products`)
+  - Global temporary tables (##) are not supported
 
 ## Example
 
@@ -72,6 +79,8 @@ id,name,email,age,city
 ```
 
 ### Generated SQL
+
+#### Regular Table
 ```sql
 -- Generated SQL INSERT statements for table: users
 -- Total rows: 3
@@ -79,6 +88,27 @@ id,name,email,age,city
 INSERT INTO users (id, name, email, age, city) VALUES ('1', 'John Doe', 'john.doe@email.com', '30', 'New York');
 INSERT INTO users (id, name, email, age, city) VALUES ('2', 'Jane Smith', 'jane.smith@email.com', '25', 'Los Angeles');
 INSERT INTO users (id, name, email, age, city) VALUES ('3', 'Bob Johnson', 'bob.johnson@email.com', '35', 'Chicago');
+```
+
+#### Temporary Table
+```sql
+-- Generated SQL INSERT statements for table: #temp_users
+-- Total rows: 3
+
+-- CREATE TABLE statement for temporary table
+CREATE TABLE #temp_users (
+    id NVARCHAR(MAX),
+    name NVARCHAR(MAX),
+    email NVARCHAR(MAX),
+    age NVARCHAR(MAX),
+    city NVARCHAR(MAX)
+);
+
+-- INSERT statements:
+
+INSERT INTO #temp_users (id, name, email, age, city) VALUES ('1', 'John Doe', 'john.doe@email.com', '30', 'New York');
+INSERT INTO #temp_users (id, name, email, age, city) VALUES ('2', 'Jane Smith', 'jane.smith@email.com', '25', 'Los Angeles');
+INSERT INTO #temp_users (id, name, email, age, city) VALUES ('3', 'Bob Johnson', 'bob.johnson@email.com', '35', 'Chicago');
 ```
 
 ## Features
@@ -118,8 +148,14 @@ The generated SQL is compatible with most SQL databases including:
 - MySQL
 - PostgreSQL
 - SQLite
-- SQL Server
+- SQL Server (including temporary tables with `#`)
 - Oracle
+
+### Temporary Tables
+- **SQL Server**: Supports `#temp_table` (local temporary tables)
+  - Automatically generates CREATE TABLE statements with NVARCHAR(MAX) columns
+  - Global temporary tables (##) are not supported
+- **Other databases**: Use regular table names or database-specific temporary table syntax
 
 ## Troubleshooting
 

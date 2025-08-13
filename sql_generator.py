@@ -94,6 +94,22 @@ def generate_sql_inserts(data: List[Dict[str, Any]], table_name: str) -> str:
     sql_lines.append(f"-- Total rows: {len(data)}")
     sql_lines.append("")
 
+    # Generate CREATE TABLE statement for temporary tables
+    if table_name.startswith('#') and not table_name.startswith('##'):
+        sql_lines.append("-- CREATE TABLE statement for temporary table")
+        sql_lines.append(f"CREATE TABLE {table_name} (")
+
+        # Add column definitions
+        column_defs = []
+        for col in columns:
+            column_defs.append(f"    {col} NVARCHAR(MAX)")
+
+        sql_lines.append(',\n'.join(column_defs))
+        sql_lines.append(");")
+        sql_lines.append("")
+        sql_lines.append("-- INSERT statements:")
+        sql_lines.append("")
+
     # Generate INSERT statements
     for i, row in enumerate(data, 1):
         # Escape single quotes in values
@@ -149,18 +165,22 @@ Examples:
   python sql_generator.py csv_input/data.csv       # Process specific CSV file
   python sql_generator.py data.csv                 # Process file (auto-prefix csv_input/)
   python sql_generator.py -t users data.csv       # Specify table name
+  python sql_generator.py -t #temp_users data.csv # Use temporary table
   python sql_generator.py -o output.sql data.csv  # Specify output file
 
 Notes:
   - CSV files are automatically looked for in csv_input/ folder
   - SQL files are automatically saved to sql_output/ folder
+  - Temporary tables (#) automatically generate CREATE TABLE statements
+  - Global temporary tables (##) are not supported
   - Run without arguments to see available CSV files
         """
     )
 
     parser.add_argument('csv_file', nargs='?', help='Input CSV file path (default: csv_input/)')
     parser.add_argument('-o', '--output', help='Output SQL file path (default: sql_output/input_name.sql)')
-    parser.add_argument('-t', '--table', default='table_name', help='Target table name (default: table_name)')
+    parser.add_argument('-t', '--table', default='table_name',
+                       help='Target table name (default: table_name). Use #temp_name for temporary tables.')
 
     args = parser.parse_args()
 
@@ -195,6 +215,13 @@ Notes:
         if os.path.exists(csv_input_path):
             args.csv_file = csv_input_path
             print(f"📁 Auto-detected CSV file: {args.csv_file}")
+
+    # Validate table name
+    if args.table.startswith('##'):
+        print("❌ Error: Global temporary tables (##) are not supported.")
+        print("   Use local temporary tables (#) instead.")
+        print("   Example: #temp_users (not ##global_temp_users)")
+        sys.exit(1)
 
     # Check if input file exists
     if not os.path.exists(args.csv_file):
