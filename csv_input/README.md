@@ -9,8 +9,11 @@ This folder is for storing CSV files that you want to convert to SQL INSERT stat
 
 ## Usage
 1. Copy or move your CSV files into this folder
-2. Run the generator: `python sql_generator.py csv_input/your_file.csv`
-3. The program will automatically read from this folder
+2. Run the generator with one of these methods:
+   - `python sql_generator.py` (shows available files)
+   - `python sql_generator.py your_file.csv` (auto-detects csv_input/ folder)
+   - `python sql_generator.py csv_input/your_file.csv` (explicit path)
+3. The program automatically reads from this folder
 
 ## File Requirements
 - CSV files should have headers in the first row

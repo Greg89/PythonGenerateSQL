@@ -145,23 +145,63 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  python sql_generator.py csv_input/data.csv
-  python sql_generator.py csv_input/data.csv -o sql_output/output.sql
-  python sql_generator.py csv_input/data.csv -t users -o sql_output/users_insert.sql
+  python sql_generator.py                           # Shows available CSV files
+  python sql_generator.py csv_input/data.csv       # Process specific CSV file
+  python sql_generator.py data.csv                 # Process file (auto-prefix csv_input/)
+  python sql_generator.py -t users data.csv       # Specify table name
+  python sql_generator.py -o output.sql data.csv  # Specify output file
 
-Note: By default, SQL files are saved to the sql_output/ folder.
+Notes:
+  - CSV files are automatically looked for in csv_input/ folder
+  - SQL files are automatically saved to sql_output/ folder
+  - Run without arguments to see available CSV files
         """
     )
 
-    parser.add_argument('csv_file', help='Input CSV file path')
-    parser.add_argument('-o', '--output', help='Output SQL file path (default: input_name.sql)')
+    parser.add_argument('csv_file', nargs='?', help='Input CSV file path (default: csv_input/)')
+    parser.add_argument('-o', '--output', help='Output SQL file path (default: sql_output/input_name.sql)')
     parser.add_argument('-t', '--table', default='table_name', help='Target table name (default: table_name)')
 
     args = parser.parse_args()
 
+    # Handle default CSV file path
+    if not args.csv_file:
+        # Look for CSV files in csv_input folder
+        csv_input_dir = "csv_input"
+        if os.path.exists(csv_input_dir):
+            csv_files = [f for f in os.listdir(csv_input_dir) if f.endswith('.csv')]
+            if csv_files:
+                print("📁 Available CSV files in csv_input/ folder:")
+                for i, file in enumerate(csv_files, 1):
+                    print(f"   {i}. {file}")
+                print()
+                print("Usage examples:")
+                print(f"   python sql_generator.py csv_input/{csv_files[0]}")
+                print(f"   python sql_generator.py csv_input/your_file.csv")
+                print()
+                sys.exit(0)
+            else:
+                print("No CSV files found in csv_input/ folder.")
+                print("Please place CSV files in the csv_input/ folder or specify a file path.")
+                sys.exit(1)
+        else:
+            print("csv_input/ folder not found.")
+            print("Please create the folder or specify a CSV file path.")
+            sys.exit(1)
+
+    # Auto-prepend csv_input/ if path doesn't exist and doesn't already have csv_input/
+    if not os.path.exists(args.csv_file) and not args.csv_file.startswith('csv_input/') and not args.csv_file.startswith('./'):
+        csv_input_path = f"csv_input/{args.csv_file}"
+        if os.path.exists(csv_input_path):
+            args.csv_file = csv_input_path
+            print(f"📁 Auto-detected CSV file: {args.csv_file}")
+
     # Check if input file exists
     if not os.path.exists(args.csv_file):
         print(f"Error: Input file '{args.csv_file}' does not exist.")
+        print(f"Tried: {args.csv_file}")
+        if not args.csv_file.startswith('csv_input/'):
+            print(f"Also tried: csv_input/{args.csv_file}")
         sys.exit(1)
 
     # Generate output filename if not specified

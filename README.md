@@ -5,6 +5,8 @@ A Python program that converts CSV files to SQL INSERT statements for easy datab
 ## Features
 
 - Converts CSV files to SQL INSERT statements
+- **Smart folder detection** - automatically finds CSV files in `csv_input/` folder
+- **Organized output** - saves SQL files to `sql_output/` folder by default
 - Handles data type conversion and escaping
 - Supports custom table names
 - Generates clean, readable SQL output
@@ -28,10 +30,14 @@ A Python program that converts CSV files to SQL INSERT statements for easy datab
 ### Basic Usage
 
 ```bash
-python sql_generator.py input.csv
-```
+# Show available CSV files
+python sql_generator.py
 
-This will create `input.sql` with INSERT statements for a table named `table_name`.
+# Process a CSV file (auto-detects csv_input/ folder)
+python sql_generator.py input.csv
+
+# This will create sql_output/input.sql with INSERT statements for a table named `table_name`
+```
 
 ### Advanced Usage
 
@@ -40,10 +46,13 @@ This will create `input.sql` with INSERT statements for a table named `table_nam
 python sql_generator.py input.csv -t users
 
 # Specify custom output file
-python sql_generator.py input.csv -o users_insert.sql
+python sql_generator.py input.csv -o sql_output/users_insert.sql
 
 # Specify both table name and output file
-python sql_generator.py input.csv -t users -o users_insert.sql
+python sql_generator.py input.csv -t users -o sql_output/users_insert.sql
+
+# Use explicit paths
+python sql_generator.py csv_input/input.csv -o sql_output/output.sql
 ```
 
 ### Command Line Options

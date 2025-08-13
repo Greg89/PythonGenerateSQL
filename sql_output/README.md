@@ -13,7 +13,10 @@ This folder contains the generated SQL INSERT statements from your CSV files.
 - Files are named based on the input CSV filename
 
 ## Usage
-1. Run the generator: `python sql_generator.py csv_input/your_file.csv`
+1. Run the generator with one of these methods:
+   - `python sql_generator.py` (shows available CSV files)
+   - `python sql_generator.py your_file.csv` (auto-detects folders)
+   - `python sql_generator.py csv_input/your_file.csv` (explicit path)
 2. SQL file will be automatically created here
 3. Use the generated SQL in your database management tool
 
