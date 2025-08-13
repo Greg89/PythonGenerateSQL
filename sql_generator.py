@@ -92,17 +92,18 @@ def generate_sql_inserts(data: List[Dict[str, Any]], table_name: str) -> str:
     sql_lines = []
     sql_lines.append(f"-- Generated SQL INSERT statements for table: {table_name}")
     sql_lines.append(f"-- Total rows: {len(data)}")
+    sql_lines.append("-- Note: Empty values are inserted as NULL (without quotes)")
     sql_lines.append("")
 
-    # Generate CREATE TABLE statement for temporary tables
+        # Generate CREATE TABLE statement for temporary tables
     if table_name.startswith('#') and not table_name.startswith('##'):
         sql_lines.append("-- CREATE TABLE statement for temporary table")
         sql_lines.append(f"CREATE TABLE {table_name} (")
 
-        # Add column definitions
+        # Add column definitions - allow NULL values
         column_defs = []
         for col in columns:
-            column_defs.append(f"    {col} NVARCHAR(MAX)")
+            column_defs.append(f"    {col} NVARCHAR(MAX) NULL")
 
         sql_lines.append(',\n'.join(column_defs))
         sql_lines.append(");")
@@ -112,14 +113,17 @@ def generate_sql_inserts(data: List[Dict[str, Any]], table_name: str) -> str:
 
     # Generate INSERT statements
     for i, row in enumerate(data, 1):
-        # Escape single quotes in values
+        # Handle values - NULL for empty/None/"NULL" text, quoted strings for actual values
         values = []
         for col in columns:
             value = row[col]
-            if value is None or value == '':
+            if (value is None or
+                value == '' or
+                str(value).strip() == '' or
+                str(value).strip().upper() == 'NULL'):
                 values.append('NULL')
             else:
-                # Escape single quotes and wrap in quotes
+                # Escape single quotes and wrap in quotes for actual values
                 escaped_value = str(value).replace("'", "''")
                 values.append(f"'{escaped_value}'")
 
