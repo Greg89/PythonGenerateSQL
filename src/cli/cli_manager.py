@@ -36,9 +36,9 @@ class CLIManager:
 
         # Add arguments
         parser.add_argument('csv_file', nargs='?',
-                          help='Input CSV file path (default: csv_input/)')
+                          help='Input CSV file path (default: input/)')
         parser.add_argument('-o', '--output',
-                          help='Output SQL file path (default: sql_output/input_name.sql)')
+                          help='Output SQL file path (default: output/input_name.sql)')
         parser.add_argument('-t', '--table', default='table_name',
                           help='Target table name (default: table_name). Use #temp_name for temporary tables.')
         parser.add_argument('-c', '--config',
@@ -62,8 +62,8 @@ class CLIManager:
         return """
 Examples:
   python main.py                                   # Shows available CSV files
-  python main.py csv_input/data.csv               # Process specific CSV file
-  python main.py data.csv                         # Process file (auto-prefix csv_input/)
+  python main.py input/data.csv                   # Process specific CSV file
+  python main.py data.csv                         # Process file (auto-prefix input/)
   python main.py -t users data.csv               # Specify table name
   python main.py -t #temp_users data.csv         # Use temporary table
   python main.py -o output.sql data.csv          # Specify output file
@@ -72,8 +72,8 @@ Examples:
   python main.py --preset quick                  # Use quick preset
 
 Notes:
-  - CSV files are automatically looked for in csv_input/ folder (JSON files are excluded)
-  - SQL files are automatically saved to sql_output/ folder
+  - CSV files are automatically looked for in input/ folder (JSON files are excluded)
+  - SQL files are automatically saved to output/ folder
   - Temporary tables (#) automatically generate CREATE TABLE statements
   - Global temporary tables (##) are not supported
   - Configuration file (config.json) can be used for persistent settings
@@ -165,23 +165,23 @@ Notes:
             csv_files: List of CSV file names
         """
         if csv_files:
-            print("📁 Available CSV files in csv_input/ folder:")
+            print("📁 Available CSV files in input/ folder:")
             for i, file in enumerate(csv_files, 1):
                 print(f"   {i}. {file}")
             print()
             print("Usage examples:")
-            print(f"   python main.py csv_input/{csv_files[0]}")
-            print(f"   python main.py csv_input/your_file.csv")
+            print(f"   python main.py input/{csv_files[0]}")
+            print(f"   python main.py input/your_file.csv")
             print()
             print("💡 Tip: Use 'python main.py --create-config' to generate configuration files")
         else:
-            print("No CSV files found in csv_input/ folder.")
-            print("Please place CSV files in the csv_input/ folder or specify a file path.")
+            print("No CSV files found in input/ folder.")
+            print("Please place CSV files in the input/ folder or specify a file path.")
             print()
             print("💡 Getting started:")
             print("   1. python main.py --create-config")
             print("   2. Copy config_sample.json to config.json and edit as needed")
-            print("   3. Place your CSV files in csv_input/ folder")
+            print("   3. Place your CSV files in input/ folder")
             print("   4. Run: python main.py your_file.csv")
 
     def show_folder_structure(self, input_dir: str, output_dir: str) -> None:

@@ -16,7 +16,7 @@ class FileManager:
     Open/Closed: Easy to extend with new file operations
     """
 
-    def __init__(self, input_directory: str = "csv_input", output_directory: str = "sql_output"):
+    def __init__(self, input_directory: str = "input", output_directory: str = "output"):
         """
         Initialize file manager.
 

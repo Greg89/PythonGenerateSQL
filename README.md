@@ -5,8 +5,8 @@ A Python program that converts CSV files to SQL INSERT statements for easy datab
 ## Features
 
 - Converts CSV files to SQL INSERT statements
-- **Smart folder detection** - automatically finds CSV files in `csv_input/` folder
-- **Organized output** - saves SQL files to `sql_output/` folder by default
+- **Smart folder detection** - automatically finds CSV files in `input/` folder
+- **Organized output** - saves SQL files to `output/` folder by default
 - **Flexible table naming** - supports regular tables and temporary tables (with `#`)
 - Handles data type conversion and escaping
 - Supports custom table names
@@ -34,10 +34,10 @@ A Python program that converts CSV files to SQL INSERT statements for easy datab
 # Show available CSV files
 python main.py
 
-# Process a CSV file (auto-detects csv_input/ folder)
+# Process a CSV file (auto-detects input/ folder)
 python main.py input.csv
 
-# This will create sql_output/input.sql with INSERT statements for a table named `table_name`
+# This will create output/input.sql with INSERT statements for a table named `table_name`
 ```
 
 ### Advanced Usage
@@ -50,13 +50,13 @@ python main.py input.csv -t users
 python main.py input.csv -t #temp_users
 
 # Specify custom output file
-python main.py input.csv -o sql_output/users_insert.sql
+python main.py input.csv -o output/users_insert.sql
 
 # Specify both table name and output file
-python main.py input.csv -t #temp_users -o sql_output/temp_users.sql
+python main.py input.csv -t #temp_users -o output/temp_users.sql
 
 # Use explicit paths
-python main.py csv_input/input.csv -o sql_output/output.sql
+python main.py input/input.csv -o output/output.sql
 ```
 
 ### Command Line Options

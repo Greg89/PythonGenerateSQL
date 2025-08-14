@@ -18,8 +18,8 @@ class ConfigManager:
     """
 
     DEFAULT_CONFIG = {
-        "input_directory": "csv_input",
-        "output_directory": "sql_output",
+        "input_directory": "input",
+        "output_directory": "output",
         "default_table_name": "table_name",
         "auto_detect_encoding": True,
         "batch_size": 100,
