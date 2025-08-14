@@ -61,15 +61,15 @@ class CLIManager:
         """
         return """
 Examples:
-  python sql_generator.py                           # Shows available CSV files
-  python sql_generator.py csv_input/data.csv       # Process specific CSV file
-  python sql_generator.py data.csv                 # Process file (auto-prefix csv_input/)
-  python sql_generator.py -t users data.csv       # Specify table name
-  python sql_generator.py -t #temp_users data.csv # Use temporary table
-  python sql_generator.py -o output.sql data.csv  # Specify output file
-  python sql_generator.py --create-config         # Create sample config file
-  python sql_generator.py --interactive           # Run in interactive mode
-  python sql_generator.py --preset quick          # Use quick preset
+  python main.py                                   # Shows available CSV files
+  python main.py csv_input/data.csv               # Process specific CSV file
+  python main.py data.csv                         # Process file (auto-prefix csv_input/)
+  python main.py -t users data.csv               # Specify table name
+  python main.py -t #temp_users data.csv         # Use temporary table
+  python main.py -o output.sql data.csv          # Specify output file
+  python main.py --create-config                 # Create sample config file
+  python main.py --interactive                   # Run in interactive mode
+  python main.py --preset quick                  # Use quick preset
 
 Notes:
   - CSV files are automatically looked for in csv_input/ folder (JSON files are excluded)
@@ -170,19 +170,19 @@ Notes:
                 print(f"   {i}. {file}")
             print()
             print("Usage examples:")
-            print(f"   python sql_generator.py csv_input/{csv_files[0]}")
-            print(f"   python sql_generator.py csv_input/your_file.csv")
+            print(f"   python main.py csv_input/{csv_files[0]}")
+            print(f"   python main.py csv_input/your_file.csv")
             print()
-            print("💡 Tip: Use 'python sql_generator.py --create-config' to generate configuration files")
+            print("💡 Tip: Use 'python main.py --create-config' to generate configuration files")
         else:
             print("No CSV files found in csv_input/ folder.")
             print("Please place CSV files in the csv_input/ folder or specify a file path.")
             print()
             print("💡 Getting started:")
-            print("   1. python sql_generator.py --create-config")
+            print("   1. python main.py --create-config")
             print("   2. Copy config_sample.json to config.json and edit as needed")
             print("   3. Place your CSV files in csv_input/ folder")
-            print("   4. Run: python sql_generator.py your_file.csv")
+            print("   4. Run: python main.py your_file.csv")
 
     def show_folder_structure(self, input_dir: str, output_dir: str) -> None:
         """

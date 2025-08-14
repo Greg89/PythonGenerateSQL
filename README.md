@@ -32,10 +32,10 @@ A Python program that converts CSV files to SQL INSERT statements for easy datab
 
 ```bash
 # Show available CSV files
-python sql_generator.py
+python main.py
 
 # Process a CSV file (auto-detects csv_input/ folder)
-python sql_generator.py input.csv
+python main.py input.csv
 
 # This will create sql_output/input.sql with INSERT statements for a table named `table_name`
 ```
@@ -44,29 +44,33 @@ python sql_generator.py input.csv
 
 ```bash
 # Specify custom table name
-python sql_generator.py input.csv -t users
+python main.py input.csv -t users
 
 # Use temporary table (SQL Server) - automatically generates CREATE TABLE
-python sql_generator.py input.csv -t #temp_users
+python main.py input.csv -t #temp_users
 
 # Specify custom output file
-python sql_generator.py input.csv -o sql_output/users_insert.sql
+python main.py input.csv -o sql_output/users_insert.sql
 
 # Specify both table name and output file
-python sql_generator.py input.csv -t #temp_users -o sql_output/temp_users.sql
+python main.py input.csv -t #temp_users -o sql_output/temp_users.sql
 
 # Use explicit paths
-python sql_generator.py csv_input/input.csv -o sql_output/output.sql
+python main.py csv_input/input.csv -o sql_output/output.sql
 ```
 
 ### Command Line Options
 
-- `csv_file`: Input CSV file path (required)
+- `csv_file`: Input CSV file path (optional, defaults to showing available files)
 - `-o, --output`: Output SQL file path (optional, defaults to input_name.sql)
 - `-t, --table`: Target table name (optional, defaults to 'table_name')
   - Supports temporary table names with `#` (e.g., `#temp_table`)
   - Supports regular table names (e.g., `users`, `products`)
   - Global temporary tables (##) are not supported
+- `-c, --config`: Configuration file path (optional, defaults to config.json)
+- `--create-config`: Create sample configuration file
+- `--interactive`: Run in interactive mode for guided operation
+- `--preset`: Use named preset (quick, detailed, minimal)
 
 ## Example
 
@@ -137,10 +141,44 @@ INSERT INTO #temp_users (id, name, email, age, city) VALUES ('3', 'Bob Johnson',
 The repository includes a sample CSV file (`sample_data.csv`) for testing:
 
 ```bash
-python sql_generator.py sample_data.csv -t test_users
+python main.py sample_data.csv -t test_users
 ```
 
 This will generate `sample_data.sql` with INSERT statements for the `test_users` table.
+
+## New Features
+
+### Configuration Management
+```bash
+# Create a sample configuration file
+python main.py --create-config
+
+# Use a specific configuration file
+python main.py -c my_config.json
+
+# Use a preset configuration
+python main.py --preset quick
+python main.py --preset detailed
+python main.py --preset minimal
+```
+
+### Interactive Mode
+```bash
+# Run in interactive mode for guided operation
+python main.py --interactive
+```
+
+### Advanced Usage Examples
+```bash
+# Show available CSV files without processing
+python main.py
+
+# Process with custom config and table name
+python main.py data.csv -c production.json -t production_users
+
+# Use interactive mode with preset
+python main.py --interactive --preset quick
+```
 
 ## Database Compatibility
 
