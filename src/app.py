@@ -6,7 +6,7 @@ Orchestrates all components and manages the conversion workflow.
 import sys
 from typing import Dict, Any, Optional
 from .config import ConfigManager, PresetManager
-from .data import CSVReader
+from .data import DataReader
 from .sql import SQLGenerator
 from .utils import FileManager
 from .cli import CLIManager
@@ -14,7 +14,7 @@ from .cli import CLIManager
 
 class SQLGeneratorApp:
     """
-    Main application class that orchestrates CSV to SQL conversion.
+    Main application class that orchestrates data file to SQL conversion.
 
     Single Responsibility: Application orchestration
     Dependency Inversion: Depends on abstractions, not concrete implementations
@@ -62,12 +62,12 @@ class SQLGeneratorApp:
             # Override config with command line arguments
             self._override_config_with_args(args)
 
-            # Handle no CSV file case
+            # Handle no data file case
             if not args.csv_file:
-                self._handle_no_csv_file()
+                self._handle_no_data_file()
 
-            # Process CSV file
-            self._process_csv_file(args)
+            # Process data file
+            self._process_data_file(args)
 
         except KeyboardInterrupt:
             print("\n⚠️  Operation cancelled by user")
@@ -92,8 +92,8 @@ class SQLGeneratorApp:
             output_directory=self.config_manager.get('output_directory')
         )
 
-        # Initialize CSV reader
-        self.csv_reader = CSVReader(
+        # Initialize data reader
+        self.data_reader = DataReader(
             auto_detect_encoding=self.config_manager.get('auto_detect_encoding')
         )
 
@@ -118,34 +118,34 @@ class SQLGeneratorApp:
             if output_dir != args.output:
                 self.config_manager.set('output_directory', output_dir)
 
-    def _handle_no_csv_file(self) -> None:
+    def _handle_no_data_file(self) -> None:
         """
-        Handle case when no CSV file is specified.
+        Handle case when no data file is specified.
 
         Raises:
             SystemExit: To show available files and exit
         """
-        csv_files = self.file_manager.list_csv_files()
-        self.cli_manager.show_available_files(csv_files)
+        data_files = self.file_manager.list_data_files()
+        self.cli_manager.show_available_files(data_files)
 
-        if csv_files:
+        if data_files:
             sys.exit(0)
         else:
             sys.exit(1)
 
-    def _process_csv_file(self, args) -> None:
+    def _process_data_file(self, args) -> None:
         """
-        Process the specified CSV file.
+        Process the specified data file.
 
         Args:
             args: Command line arguments
         """
         # Resolve and validate file path
-        csv_file = self.file_manager.resolve_file_path(args.csv_file)
+        data_file = self.file_manager.resolve_file_path(args.csv_file)
 
-        if not self.file_manager.validate_file_exists(csv_file):
-            print(f"Error: Input file '{csv_file}' does not exist.")
-            if not csv_file.startswith(self.file_manager.input_directory):
+        if not self.file_manager.validate_file_exists(data_file):
+            print(f"Error: Input file '{data_file}' does not exist.")
+            if not data_file.startswith(self.file_manager.input_directory):
                 print(f"Also tried: {self.file_manager.input_directory}/{args.csv_file}")
             sys.exit(1)
 
@@ -158,33 +158,33 @@ class SQLGeneratorApp:
             sys.exit(1)
 
         # Generate output file path
-        output_file = self.file_manager.generate_output_path(csv_file, args.output)
+        output_file = self.file_manager.generate_output_path(data_file, args.output)
         self.file_manager.ensure_output_directory(output_file)
 
         # Show processing information
-        self.cli_manager.show_processing_info(csv_file, table_name, output_file)
+        self.cli_manager.show_processing_info(data_file, table_name, output_file)
         self.cli_manager.show_folder_structure(
             self.file_manager.input_directory,
             self.file_manager.output_directory
         )
 
-        # Read CSV data
-        print("Reading CSV file...")
-        data = self.csv_reader.read_file(csv_file)
+        # Read data file
+        print("Reading data file...")
+        data = self.data_reader.read_file(data_file)
 
         if not data:
-            print("❌ Error: No data found in CSV file")
+            print("❌ Error: No data found in file")
             sys.exit(1)
 
         # Validate data structure
-        if not self.csv_reader.validate_data(data):
-            print("❌ Error: Invalid CSV data structure")
+        if not self.data_reader.validate_data(data):
+            print("❌ Error: Invalid data structure")
             sys.exit(1)
 
-        print(f"Found {self.csv_reader.get_row_count(data)} rows with {len(data[0])} columns")
+        print(f"Found {self.data_reader.get_row_count(data)} rows with {len(data[0])} columns")
 
         # Show column information
-        column_info = self.csv_reader.get_column_info(data)
+        column_info = self.data_reader.get_column_info(data)
         self.cli_manager.show_column_info(column_info['names'])
 
         # Generate SQL
@@ -219,14 +219,14 @@ class SQLGeneratorApp:
         """
         return self.file_manager
 
-    def get_csv_reader(self) -> Optional[CSVReader]:
+    def get_data_reader(self) -> Optional[DataReader]:
         """
-        Get CSV reader instance.
+        Get data reader instance.
 
         Returns:
-            CSV reader instance or None
+            Data reader instance or None
         """
-        return self.csv_reader
+        return self.data_reader
 
     def get_sql_generator(self) -> Optional[SQLGenerator]:
         """

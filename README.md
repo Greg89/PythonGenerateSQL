@@ -1,11 +1,11 @@
-# CSV to SQL Converter
+# Data to SQL Converter
 
-A Python program that converts CSV files to SQL INSERT statements for easy database table insertion.
+A Python program that converts CSV, TXT, XML, and JSON files to SQL INSERT statements for easy database table insertion.
 
 ## Features
 
-- Converts CSV files to SQL INSERT statements
-- **Smart folder detection** - automatically finds CSV files in `input/` folder
+- Converts CSV, TXT, XML, and JSON files to SQL INSERT statements
+- **Smart folder detection** - automatically finds data files in `input/` folder
 - **Organized output** - saves SQL files to `output/` folder by default
 - **Flexible table naming** - supports regular tables and temporary tables (with `#`)
 - Handles data type conversion and escaping
@@ -31,11 +31,16 @@ A Python program that converts CSV files to SQL INSERT statements for easy datab
 ### Basic Usage
 
 ```bash
-# Show available CSV files
+# Show available data files
 python main.py
 
-# Process a CSV file (auto-detects input/ folder)
+# Process a data file (auto-detects input/ folder)
 python main.py input.csv
+
+# Process different file formats
+python main.py data.txt
+python main.py config.xml
+python main.py users.json
 
 # This will create output/input.sql with INSERT statements for a table named `table_name`
 ```
@@ -74,7 +79,7 @@ python main.py input/input.csv -o output/output.sql
 
 ## Example
 
-### Input CSV (sample_data.csv)
+### Input Data (sample_data.csv)
 ```csv
 id,name,email,age,city
 1,John Doe,john.doe@email.com,30,New York
@@ -118,11 +123,12 @@ INSERT INTO #temp_users (id, name, email, age, city) VALUES ('3', 'Bob Johnson',
 ## Features
 
 ### Data Handling
-- Automatically detects column names from CSV header
+- Automatically detects column names from file headers (CSV, TXT) or structure (XML, JSON)
 - Handles BOM (Byte Order Mark) characters and other invisible Unicode characters
 - Escapes single quotes in text values
 - Converts empty strings to NULL
 - Handles all data types as strings (safe for most databases)
+- Intelligently flattens nested objects while excluding collections
 
 ### Output Format
 - Clean, readable SQL statements
@@ -132,19 +138,61 @@ INSERT INTO #temp_users (id, name, email, age, city) VALUES ('3', 'Bob Johnson',
 
 ### Error Handling
 - File not found errors
-- CSV parsing errors
+- File format parsing errors (CSV, TXT, XML, JSON)
 - Output file write errors
 - Graceful error messages and exit codes
 
 ## Testing
 
-The repository includes a sample CSV file (`sample_data.csv`) for testing:
+The repository includes sample data files for testing:
 
 ```bash
+# Test CSV format
 python main.py sample_data.csv -t test_users
+
+# Test TXT format
+python main.py sample_data.txt -t txt_users
+
+# Test XML format
+python main.py sample_data.xml -t xml_users
+
+# Test JSON format
+python main.py sample_data.json -t json_users
 ```
 
-This will generate `sample_data.sql` with INSERT statements for the `test_users` table.
+These will generate SQL files with INSERT statements for the respective tables.
+
+## Supported File Formats
+
+The converter now supports multiple file formats:
+
+### CSV Files
+- Standard comma-separated values
+- Automatic encoding detection (UTF-8, UTF-8-BOM)
+- Handles BOM characters and invisible Unicode characters
+
+### TXT Files
+- Tab-separated or space-separated values
+- Automatic separator detection
+- First line treated as header
+
+### XML Files
+- Single level of nesting supported
+- Nested collections are excluded (set to NULL)
+- Direct child elements are extracted as columns
+
+### JSON Files
+- Single level of nesting supported
+- Nested collections are excluded (set to NULL)
+- Supports both single objects and arrays of objects
+- Nested objects are flattened with underscore-separated keys
+
+### Nested Collection Handling
+For XML and JSON files, the converter implements intelligent nested data handling:
+- **Direct properties**: Extracted normally as columns
+- **Nested objects**: Flattened with underscore-separated keys
+- **Nested collections**: Excluded and set to NULL
+- **Parent columns**: Preserved but with NULL values for nested collections
 
 ## New Features
 
@@ -170,11 +218,13 @@ python main.py --interactive
 
 ### Advanced Usage Examples
 ```bash
-# Show available CSV files without processing
+# Show available data files without processing
 python main.py
 
-# Process with custom config and table name
+# Process different file formats with custom config and table name
 python main.py data.csv -c production.json -t production_users
+python main.py users.xml -c production.json -t production_users
+python main.py config.json -c production.json -t production_users
 
 # Use interactive mode with preset
 python main.py --interactive --preset quick
@@ -203,11 +253,18 @@ If you encounter SQL parsing errors mentioning "Zero Width No-Break Space - U+FE
 ### Column Name Issues
 The program automatically cleans column names by removing invisible characters and trimming whitespace to ensure clean SQL generation.
 
+### File Format Issues
+- **TXT files**: Ensure first line contains headers, use consistent separators (tab or space)
+- **XML files**: Ensure single level of nesting, nested collections will be excluded
+- **JSON files**: Ensure single level of nesting, nested collections will be excluded
+
 ## Limitations
 
 - All values are treated as strings (you may need to cast to appropriate types in your database)
-- Large CSV files will generate large SQL files
+- Large data files will generate large SQL files
 - No support for batch INSERT statements (one INSERT per row)
+- XML and JSON support limited to single level of nesting
+- Nested collections are excluded and set to NULL
 
 ## Contributing
 

@@ -42,7 +42,12 @@ desktop.ini
 
 # Data files - exclude from version control
 *.csv
+*.txt
+*.xml
 *.sql
+
+# JSON files - exclude only from input folder
+input/*.json
 
 # Configuration files - exclude from version control (users generate their own)
 config.json
@@ -50,8 +55,8 @@ config.json
 !config_sample.json
 
 # Keep README files in subfolders
-!csv_input/README.md
-!sql_output/README.md
+!input/README.md
+!output/README.md
 
 # Logs
 *.log

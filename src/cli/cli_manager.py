@@ -29,14 +29,14 @@ class CLIManager:
             Configured argument parser
         """
         parser = argparse.ArgumentParser(
-            description='Convert CSV file to SQL INSERT statements',
+            description='Convert data files (CSV, TXT, XML, JSON) to SQL INSERT statements',
             formatter_class=argparse.RawDescriptionHelpFormatter,
             epilog=self._get_help_epilog()
         )
 
         # Add arguments
         parser.add_argument('csv_file', nargs='?',
-                          help='Input CSV file path (default: input/)')
+                          help='Input data file path (CSV, TXT, XML, JSON) (default: input/)')
         parser.add_argument('-o', '--output',
                           help='Output SQL file path (default: output/input_name.sql)')
         parser.add_argument('-t', '--table', default='table_name',
@@ -61,10 +61,12 @@ class CLIManager:
         """
         return """
 Examples:
-  python main.py                                   # Shows available CSV files
+  python main.py                                   # Shows available data files
   python main.py input/data.csv                   # Process specific CSV file
   python main.py data.csv                         # Process file (auto-prefix input/)
-  python main.py -t users data.csv               # Specify table name
+  python main.py input/users.xml                  # Process XML file
+  python main.py config.json                      # Process JSON file
+  python main.py -t users data.txt               # Specify table name
   python main.py -t #temp_users data.csv         # Use temporary table
   python main.py -o output.sql data.csv          # Specify output file
   python main.py --create-config                 # Create sample config file
@@ -72,12 +74,12 @@ Examples:
   python main.py --preset quick                  # Use quick preset
 
 Notes:
-  - CSV files are automatically looked for in input/ folder (JSON files are excluded)
+  - Data files (CSV, TXT, XML, JSON) are automatically looked for in input/ folder
   - SQL files are automatically saved to output/ folder
   - Temporary tables (#) automatically generate CREATE TABLE statements
   - Global temporary tables (##) are not supported
   - Configuration file (config.json) can be used for persistent settings
-  - Run without arguments to see available CSV files
+  - Run without arguments to see available data files
         """
 
     def parse_arguments(self) -> argparse.Namespace:
@@ -157,31 +159,31 @@ Notes:
 
         return config
 
-    def show_available_files(self, csv_files: list) -> None:
+    def show_available_files(self, data_files: list) -> None:
         """
-        Show available CSV files.
+        Show available data files.
 
         Args:
-            csv_files: List of CSV file names
+            data_files: List of data file names
         """
-        if csv_files:
-            print("📁 Available CSV files in input/ folder:")
-            for i, file in enumerate(csv_files, 1):
+        if data_files:
+            print("📁 Available data files in input/ folder:")
+            for i, file in enumerate(data_files, 1):
                 print(f"   {i}. {file}")
             print()
             print("Usage examples:")
-            print(f"   python main.py input/{csv_files[0]}")
+            print(f"   python main.py input/{data_files[0]}")
             print(f"   python main.py input/your_file.csv")
             print()
             print("💡 Tip: Use 'python main.py --create-config' to generate configuration files")
         else:
-            print("No CSV files found in input/ folder.")
-            print("Please place CSV files in the input/ folder or specify a file path.")
+            print("No data files found in input/ folder.")
+            print("Please place data files (CSV, TXT, XML, JSON) in the input/ folder or specify a file path.")
             print()
             print("💡 Getting started:")
             print("   1. python main.py --create-config")
             print("   2. Copy config_sample.json to config.json and edit as needed")
-            print("   3. Place your CSV files in input/ folder")
+            print("   3. Place your data files in input/ folder")
             print("   4. Run: python main.py your_file.csv")
 
     def show_folder_structure(self, input_dir: str, output_dir: str) -> None:
@@ -193,20 +195,20 @@ Notes:
             output_dir: Output directory path
         """
         print("📁 Folder Structure:")
-        print(f"   {input_dir}/     - Place your CSV files here (JSON files excluded)")
+        print(f"   {input_dir}/     - Place your data files here (CSV, TXT, XML, JSON)")
         print(f"   {output_dir}/    - Generated SQL files go here")
         print("-" * 50)
 
-    def show_processing_info(self, csv_file: str, table_name: str, output_file: str) -> None:
+    def show_processing_info(self, data_file: str, table_name: str, output_file: str) -> None:
         """
         Show processing information.
 
         Args:
-            csv_file: Input CSV file path
+            data_file: Input data file path
             table_name: Target table name
             output_file: Output SQL file path
         """
-        print(f"Converting CSV file: {csv_file}")
+        print(f"Converting data file: {data_file}")
         print(f"Target table: {table_name}")
         print(f"Output file: {output_file}")
         print("-" * 50)

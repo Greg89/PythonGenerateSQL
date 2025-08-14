@@ -27,24 +27,23 @@ class FileManager:
         self.input_directory = input_directory
         self.output_directory = output_directory
 
-    def list_csv_files(self, exclude_json: bool = True) -> List[str]:
+    def list_data_files(self, exclude_json: bool = False) -> List[str]:
         """
-        List CSV files in the input directory.
+        List supported data files in the input directory.
 
         Args:
-            exclude_json: Whether to exclude JSON files
+            exclude_json: Whether to exclude JSON files (default: False, now supported)
 
         Returns:
-            List of CSV file names
+            List of supported data file names
         """
         if not os.path.exists(self.input_directory):
             return []
 
+        supported_extensions = ['.csv', '.txt', '.xml', '.json']
         files = []
         for file in os.listdir(self.input_directory):
-            if file.endswith('.csv'):
-                if exclude_json and file.endswith('.json'):
-                    continue
+            if any(file.lower().endswith(ext) for ext in supported_extensions):
                 files.append(file)
 
         return sorted(files)
@@ -70,7 +69,7 @@ class FileManager:
         # Try auto-prepending input directory
         auto_path = f"{self.input_directory}/{file_path}"
         if os.path.exists(auto_path):
-            print(f"📁 Auto-detected CSV file: {auto_path}")
+            print(f"📁 Auto-detected data file: {auto_path}")
             return auto_path
 
         return file_path
@@ -180,17 +179,18 @@ class FileManager:
             os.makedirs(directory)
             print(f"📁 Created directory: {directory}")
 
-    def is_csv_file(self, file_path: str) -> bool:
+    def is_supported_data_file(self, file_path: str) -> bool:
         """
-        Check if file is a CSV file.
+        Check if file is a supported data file.
 
         Args:
             file_path: Path to check
 
         Returns:
-            True if file is CSV
+            True if file is supported
         """
-        return file_path.lower().endswith('.csv')
+        supported_extensions = ['.csv', '.txt', '.xml', '.json']
+        return any(file_path.lower().endswith(ext) for ext in supported_extensions)
 
     def get_relative_path(self, file_path: str, base_directory: str) -> str:
         """

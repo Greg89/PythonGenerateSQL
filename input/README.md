@@ -1,33 +1,37 @@
-# CSV Input Folder
+# Data Input Folder
 
-This folder is for storing CSV files that you want to convert to SQL INSERT statements.
+This folder is for storing data files (CSV, TXT, XML, JSON) that you want to convert to SQL INSERT statements.
 
 ## Purpose
-- Place your CSV files here before running the SQL generator
+- Place your data files here before running the SQL generator
 - Keep your input data organized and separate from generated output
-- CSV files in this folder will be processed by `sql_generator.py`
+- Data files in this folder will be processed by `main.py`
 
 ## Usage
-1. Copy or move your CSV files into this folder
+1. Copy or move your data files into this folder
 2. Run the generator with one of these methods:
-   - `python sql_generator.py` (shows available files)
-   - `python sql_generator.py your_file.csv` (auto-detects csv_input/ folder)
-   - `python sql_generator.py csv_input/your_file.csv` (explicit path)
+   - `python main.py` (shows available files)
+   - `python main.py your_file.csv` (auto-detects input/ folder)
+   - `python main.py input/your_file.csv` (explicit path)
 3. The program automatically reads from this folder
 
 ## File Requirements
-- CSV files should have headers in the first row
-- Files should be in UTF-8 encoding (BOM characters are automatically handled)
-- Supported formats: `.csv`
+- **CSV files**: Should have headers in the first row, UTF-8 encoding (BOM characters are automatically handled)
+- **TXT files**: Should have headers in the first row, tab or space separated, UTF-8 encoding
+- **XML files**: Should have a single level of nesting, nested collections are excluded
+- **JSON files**: Should have a single level of nesting, nested collections are excluded
+- **Supported formats**: `.csv`, `.txt`, `.xml`, `.json`
 
 ## Example
 ```
-csv_input/
+input/
 ├── README.md
 ├── sample_data.csv
 ├── users.csv
-└── products.csv
+├── products.txt
+├── config.xml
+└── data.json
 ```
 
 ## Note
-CSV files in this folder are ignored by Git to avoid uploading data files to version control.
+Data files in this folder are ignored by Git to avoid uploading data files to version control.

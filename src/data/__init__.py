@@ -2,6 +2,6 @@
 Data handling package.
 """
 
-from .csv_reader import CSVReader
+from .data_reader import DataReader
 
-__all__ = ['CSVReader']
+__all__ = ['DataReader']
